@@ -1,0 +1,36 @@
+.container {
+    margin-top: 50px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+}
+
+.form-group input, 
+.form-group select, 
+.form-group textarea {
+    width: 100%;
+}
+
+.text-danger {
+    color: red;
+}
+
+.btn-primary {
+    background-color: pink;
+    border-color: purple;
+}
+
+.btn-secondary {
+    background-color: palevioletred;
+    border-color: #6c757d;
+}
