@@ -6,15 +6,15 @@
 
 @section('search_form')
 <div class="search-bar">
-    <form action="{{ route('products.search') }}" method="GET">
+    <form action="{{ route('products.index') }}" method="GET">
         <input type="text" name="query" placeholder="商品名を入力してください" value="{{ request('query') }}">
         <select name="mecaer">
             <option value="">メーカー名</option>
-            <option value="コカコーラ" {{ request('mecaer') == 'コカコーラ' ? 'selected' : '' }}>コカコーラ</option>
-            <option value="サントリー" {{ request('mecaer') == 'サントリー' ? 'selected' : '' }}>サントリー</option>
-            <option value="天然水" {{ request('mecaer') == '天然水' ? 'selected' : '' }}>天然水</option>
-            <option value="BOSS" {{ request('mecaer') == 'BOSS' ? 'selected' : '' }}>BOSS</option>
-            <option value="キリン" {{ request('mecaer') == 'キリン' ? 'selected' : '' }}>キリン</option>
+            @foreach($companies as $company)
+                <option value="{{ $company->company_name }}" {{ request('mecaer') == $company->company_name ? 'selected' : '' }}>
+                    {{ $company->company_name }}
+                </option>
+            @endforeach
         </select>
         <button type="submit">検索</button>
     </form>
@@ -24,6 +24,20 @@
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/index.css') }}">
 <h1>商品一覧画面</h1>
+
+<!-- フラッシュメッセージの表示 -->
+@if (session('success'))
+    <div class="alert alert-success">
+        {{ session('success') }}
+    </div>
+@endif
+
+@if (session('error'))
+    <div class="alert alert-danger">
+        {{ session('error') }}
+    </div>
+@endif
+
 <div class="container">
     <!-- 検索フォームを表示 -->
     @yield('search_form')
@@ -44,18 +58,20 @@
             @foreach ($products as $product)
             <tr>
                 <td>{{ $product->id }}</td>
-                <td><img src="{{ asset('storage/images/' . $product->img_path) }}" alt="商品画像" class="product-image"/></td>
+                <td><img src="{{ asset($product->image_path) }}" alt="商品画像" width="100"></td> <!-- 修正：imge_path を image_path に -->
                 <td>{{ $product->product_name }}</td>
                 <td>¥{{ $product->price }}</td>
                 <td>{{ $product->stock }}</td>
                 <td>{{ $product->company ? $product->company->company_name : 'N/A' }}</td>
                 <td>
-                    <a href="{{ route('products.show', $product->id) }}" class="btn btn-warning">詳細</a>
-                    <form action="{{ route('products.destroy', $product->id) }}" method="POST" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">削除</button>
-                    </form>
+                <a href="{{ route('products.show', $product->id) }}" class="btn btn-warning">詳細</a>
+            <form action="{{ route('products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('削除しますか？!');" style="display:inline;">
+             @csrf
+             @method('DELETE')
+            <button type="submit" class="btn btn-danger">削除</button>
+            </form>
+
+            </form>
                 </td>
             </tr>
             @endforeach
@@ -66,3 +82,4 @@
     </div>
 </div>
 @endsection
+
