@@ -23,16 +23,17 @@ class ProductRequest extends FormRequest
      * @return array
      */
     public function rules()
-    {
-        return [
-            'product_name' => 'required|string|max:255',
-            'company_id' => 'required|exists:companies,id',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'comment' => 'nullable|string',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ];
-    }
+{
+    return [
+        'product_name' => ['required', 'string', 'max:255'],
+        'company_id' => ['required', 'exists:companies,id'],
+        'price' => ['required', 'numeric', 'min:0'],
+        'stock' => ['required', 'integer', 'min:0'],
+        'comment' => ['nullable', 'string'],
+        'image_path' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+    ];
+}
+
 
     /**
      * Get the error messages for the defined validation rules.

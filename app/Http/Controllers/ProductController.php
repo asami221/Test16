@@ -25,7 +25,7 @@ class ProductController extends Controller
         }
 
         $products = $query->orderBy('id', 'asc')->paginate(5);
-        $companies = Company::all(); 
+        $companies = Company::all();
 
         return view('index', compact('products', 'companies'))
             ->with('i', ($request->input('page', 1) - 1) * 5);
@@ -51,17 +51,19 @@ class ProductController extends Controller
     public function store(ProductRequest $request)
     {
         try {
-          
+            // バリデーション済みのデータを取得
             $validatedData = $request->validated();
 
+            // 新しい商品インスタンスを作成
             $product = new Product($validatedData);
 
-          
+            // 画像ファイルのアップロード処理
             if ($request->hasFile('image_path')) {
                 $filePath = $request->file('image_path')->store('public/images');
-                $product->image_path = basename($filePath); // 画像パスを保存する
+                Log::info('Uploaded file path: ' . $filePath); 
+                $product->image_path = basename($filePath); 
             } else {
-                $product->image_path = 'default_image.jpg'; // 適切なデフォルト画像を設定
+                $product->image_path = 'default_image.jpg'; 
             }
 
             // データベースに保存
@@ -83,34 +85,42 @@ class ProductController extends Controller
     // 商品編集画面表示
     public function edit($id)
     {
-      
+        // 指定されたIDの商品を取得
         $product = Product::findOrFail($id);
         $companies = Company::all();
-
-     
-        $showUrl = route('products.show', ['id' => $id]);
-
+    
+        // 詳細表示URLを生成
+        $showUrl = route('products.show', ['product' => $id]);  // 'product' はルートパラメータ名に合わせる
+    
         return view('edit', compact('product', 'companies', 'showUrl'));
     }
-
-    // 商品更新処理
-    public function update(ProductRequest $request, $id)
-{
-    try {
-        
-        $validatedData = $request->validated();
-
-        $product = Product::findOrFail($id);
-        $product->update($validatedData);
-
-      
-        if ($request->hasFile('image_path')) {
-            $filePath = $request->file('image_path')->store('public/images');
-            $product->image_path = basename($filePath);
-        }
-
-        // データベースに保存
-        $product->save();
+    
+   
+   // 商品更新処理
+   public function update(ProductRequest $request, $id)
+   {
+       try {
+           // バリデーション済みのデータを取得
+           $validatedData = $request->validated();
+   
+           // 指定されたIDの商品を取得
+           $product = Product::findOrFail($id);
+   
+           // 画像ファイルのアップロード処理
+           if ($request->hasFile('image_path')) {
+               // 画像を保存し、ファイルパスを取得
+               $filePath = $request->file('image_path')->store('public/images');
+               Log::info('Uploaded file path: ' . $filePath); 
+               // 新しい画像パスを商品オブジェクトに設定
+               $product->image_path = basename($filePath);
+           }
+   
+           // 画像以外のプロパティの更新
+           $product->update($validatedData);
+   
+           // データベースに保存
+           $product->save();
+   
 
         // 成功メッセージ
         return redirect()->route('products.edit', $id)
@@ -123,30 +133,27 @@ class ProductController extends Controller
         return redirect()->route('products.edit', $id)
             ->with('error', __('products.error_update'));
     }
+
 }
 
-    
-
     // 商品削除処理
-    // 商品削除処理
-public function destroy($id)
-{
-    try {
-        // 商品を検索して削除
-        $product = Product::findOrFail($id);
-        $product->delete();
+    public function destroy($id)
+    {
+        try {
+            // 商品を検索して削除
+            $product = Product::findOrFail($id);
+            $product->delete();
 
-        // 成功メッセージをフラッシュデータに追加してリダイレクト
-        return redirect()->route('products.index')
-            ->with('success', __('products.success_delete'));
-    } catch (\Exception $e) {
-        // エラーログの記録
-        Log::error('商品削除エラー: ' . $e->getMessage());
+            // 成功メッセージをフラッシュデータに追加してリダイレクト
+            return redirect()->route('products.index')
+                ->with('success', __('products.success_delete'));
+        } catch (\Exception $e) {
+            // エラーログの記録
+            Log::error('商品削除エラー: ' . $e->getMessage());
 
-        // エラーメッセージをフラッシュデータに追加してリダイレクト
-        return redirect()->route('products.index')
-            ->with('error', __('products.error_delete'));
+            // エラーメッセージをフラッシュデータに追加してリダイレクト
+            return redirect()->route('products.index')
+                ->with('error', __('products.error_delete'));
+        }
     }
-}
-
 }

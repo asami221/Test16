@@ -62,15 +62,16 @@
 
                 <!-- 画像 -->
                 <div class="col-12 mb-2 mt-2">
-                    <div class="form-group">
-                        <label for="image">商品画像</label>
-                        @if($product->image_path)
-                        <img src="{{ asset($product->imge_path) }}" alt="商品画像" width="100"></td>
-                        @else
-                            <p class="form-control-static">画像なし</p>
-                        @endif
+                   <div class="form-group">
+                     <label for="image">商品画像</label>
+                      @if($product->image_path)
+                     <img src="{{ asset('storage/images/' . $product->image_path) }}" alt="商品画像" style="max-width: 200px;">
+                     @else
+                     <p class="form-control-static">画像なし</p>
+                     @endif
                     </div>
                 </div>
+
 
                 <!-- ボタン -->
                 <div class="col-12 mb-2 mt-2">

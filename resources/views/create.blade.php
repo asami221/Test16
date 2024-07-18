@@ -55,12 +55,13 @@
         </div>
 
         <div class="form-group">
-            <label for="image">商品画像</label>
-            <input type="file" name="img_path" class="form-control">
-            @error('img_path')
-            <span class="text-danger">{{ $message }}</span>
-            @enderror
+           <label for="image">商品画像</label>
+           <input type="file" name="image_path" class="form-control">
+           @error('image_path')
+           <span class="text-danger">{{ $message }}</span>
+           @enderror
         </div>
+
 
         <button type="submit" class="btn btn-primary">新規登録</button>
         <a class="btn btn-secondary" href="{{ url('/products') }}">戻る</a>

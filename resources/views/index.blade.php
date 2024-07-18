@@ -55,15 +55,18 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($products as $product)
-            <tr>
-                <td>{{ $product->id }}</td>
-                <td><img src="{{ asset($product->image_path) }}" alt="商品画像" width="100"></td> <!-- 修正：imge_path を image_path に -->
-                <td>{{ $product->product_name }}</td>
-                <td>¥{{ $product->price }}</td>
-                <td>{{ $product->stock }}</td>
-                <td>{{ $product->company ? $product->company->company_name : 'N/A' }}</td>
-                <td>
+        @foreach ($products as $product)
+                <tr>
+                    <td>{{ $product->id }}</td>
+                    <td>
+                       <img src="{{ asset('storage/images/' . $product->image_path) }}" alt="商品画像" style="max-width: 200px;">
+                    </td>
+
+                    <td>{{ $product->product_name }}</td>
+                    <td>¥{{ $product->price }}</td>
+                    <td>{{ $product->stock }}</td>
+                    <td>{{ $product->company ? $product->company->company_name : 'N/A' }}</td>
+                    <td>
                 <a href="{{ route('products.show', $product->id) }}" class="btn btn-warning">詳細</a>
             <form action="{{ route('products.destroy', $product->id) }}" method="POST" onsubmit="return confirm('削除しますか？!');" style="display:inline;">
              @csrf
@@ -82,4 +85,3 @@
     </div>
 </div>
 @endsection
-

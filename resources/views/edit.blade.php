@@ -86,14 +86,16 @@
 
                         <!-- 画像はファイルセレクタ -->
                         <div class="col-12 mb-2 mt-2">
-                            <div class="form-group">
-                                <label for="image_path">商品画像</label>
-                                <input type="file" name="image_path" class="form-control">
-                                @error('img_path')
-                                <span class="text-danger">{{ $message }}</span>
-                                @enderror
-                            </div>
+                          <div class="form-group">
+                             <label for="image">商品画像</label>
+                             @if($product->image_path)
+                            <img src="{{ asset('storage/images/' . $product->image_path) }}" alt="商品画像" style="max-width: 200px;">
+                             @else
+                             <p class="form-control-static">画像なし</p>
+                             @endif
+                          </div>
                         </div>
+
 
                         <div class="col-12 mb-2 mt-2">
                             <button type="submit" class="btn btn-primary w-100">更新する</button>
