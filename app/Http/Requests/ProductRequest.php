@@ -23,17 +23,16 @@ class ProductRequest extends FormRequest
      * @return array
      */
     public function rules()
-{
-    return [
-        'product_name' => ['required', 'string', 'max:255'],
-        'company_id' => ['required', 'exists:companies,id'],
-        'price' => ['required', 'numeric', 'min:0'],
-        'stock' => ['required', 'integer', 'min:0'],
-        'comment' => ['nullable', 'string'],
-        'image_path' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
-    ];
-}
-
+    {
+        return [
+            'product_name' => ['required', 'string', 'max:255'],
+            'company_id' => ['required', 'exists:companies,id'],
+            'price' => ['required', 'numeric', 'min:0'],
+            'stock' => ['required', 'integer', 'min:0'],
+            'comment' => ['nullable', 'string'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+        ];
+    }
 
     /**
      * Get the error messages for the defined validation rules.
@@ -55,12 +54,9 @@ class ProductRequest extends FormRequest
             'stock.integer' => '在庫数は整数でなければなりません。',
             'stock.min' => '在庫数は0以上でなければなりません。',
             'comment.string' => 'コメントは文字列でなければなりません。',
-            'image_path.image' => '画像は有効な画像ファイルでなければなりません。',
-            'image_path.mimes' => '画像の形式はjpeg, png, jpg, gif, svgのいずれかでなければなりません。',
-            'image_path.max' => '画像のサイズは2048KB以内でなければなりません。',
-
-
-
+            'image.image' => '画像は有効な画像ファイルでなければなりません。',
+            'image.mimes' => '画像の形式はjpeg, png, jpg, gif, svgのいずれかでなければなりません。',
+            'image.max' => '画像のサイズは2048KB以内でなければなりません。',
         ];
     }
 }

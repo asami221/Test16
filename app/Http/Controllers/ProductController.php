@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -90,51 +91,65 @@ class ProductController extends Controller
         $companies = Company::all();
     
         // 詳細表示URLを生成
-        $showUrl = route('products.show', ['product' => $id]);  // 'product' はルートパラメータ名に合わせる
+        $showUrl = route('products.show', ['product' => $id]);  
     
         return view('edit', compact('product', 'companies', 'showUrl'));
     }
-    
    
-   // 商品更新処理
-   public function update(ProductRequest $request, $id)
-   {
-       try {
-           // バリデーション済みのデータを取得
-           $validatedData = $request->validated();
-   
-           // 指定されたIDの商品を取得
-           $product = Product::findOrFail($id);
-   
-           // 画像ファイルのアップロード処理
-           if ($request->hasFile('image_path')) {
-               // 画像を保存し、ファイルパスを取得
-               $filePath = $request->file('image_path')->store('public/images');
-               Log::info('Uploaded file path: ' . $filePath); 
-               // 新しい画像パスを商品オブジェクトに設定
-               $product->image_path = basename($filePath);
-           }
-   
-           // 画像以外のプロパティの更新
-           $product->update($validatedData);
-   
-           // データベースに保存
-           $product->save();
-   
+    // 商品更新処理
+    public function update(ProductRequest $request, $id)
+    {
+        try {
+        // 指定されたIDの商品を取得
+        $product = Product::findOrFail($id);
 
-        // 成功メッセージ
+        // バリデーション済みのデータを取得
+        $validatedData = $request->validated();
+        Log::info('Validated data:', $validatedData);
+
+        // 画像ファイルのアップロード処理
+        if ($request->hasFile('image_path')) {
+            Log::info('Image file detected');
+    
+            if ($product->image_path && Storage::exists('public/images/' . $product->image_path)) {
+                Log::info('Deleting existing image: ' . $product->image_path);
+                Storage::delete('public/images/' . $product->image_path);
+            }
+
+            $file = $request->file('image_path');
+            $filePath = $file->store('images', 'public'); 
+            Log::info('Uploaded file path: ' . $filePath);
+
+    
+            $validatedData['image_path'] = basename($filePath);
+        }
+
+       
+        $product->fill($validatedData);
+
+        
+        $product->updated_at = now();
+        Log::info('Product updated successfully', $product->toArray());
+
+        // データベースに保存
+        $product->save();
+        Log::info('Product saved successfully');
+
+        
         return redirect()->route('products.edit', $id)
             ->with('success', __('products.success_update'));
-    } catch (\Exception $e) {
-        // エラーログの記録
+        } catch (\Exception $e) {
+      
         Log::error('商品更新エラー: ' . $e->getMessage());
 
-        // エラーメッセージ
         return redirect()->route('products.edit', $id)
             ->with('error', __('products.error_update'));
+        }
     }
 
-}
+    
+
+    
 
     // 商品削除処理
     public function destroy($id)
@@ -142,6 +157,10 @@ class ProductController extends Controller
         try {
             // 商品を検索して削除
             $product = Product::findOrFail($id);
+            // 画像ファイルがあれば削除
+            if ($product->image_path && Storage::exists('public/images/' . $product->image_path)) {
+                Storage::delete('public/images/' . $product->image_path);
+            }
             $product->delete();
 
             // 成功メッセージをフラッシュデータに追加してリダイレクト

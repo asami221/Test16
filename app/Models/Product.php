@@ -19,7 +19,7 @@ class Product extends Model
         'stock',
         'company_id',
         'comment',
-        'img_path',
+        'image_path',
     ];
 
     // Productモデルがsalesテーブルとリレーション関係を結ぶためのメソッド

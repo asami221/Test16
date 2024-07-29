@@ -84,19 +84,20 @@
                             </div>
                         </div>
 
-                        <!-- 画像はファイルセレクタ -->
+                        <!-- 商品画像 -->
                         <div class="col-12 mb-2 mt-2">
-                          <div class="form-group">
-                             <label for="image">商品画像</label>
-                             @if($product->image_path)
-                            <img src="{{ asset('storage/images/' . $product->image_path) }}" alt="商品画像" style="max-width: 200px;">
-                             @else
-                             <p class="form-control-static">画像なし</p>
-                             @endif
-                          </div>
+                            <div class="form-group">
+                                <label for="image">商品画像</label>
+                                @if($product->image_path)
+                                    <img src="{{ asset('storage/images/' . $product->image_path) }}" alt="商品画像" style="max-width: 200px;">
+                                @else
+                                    <p class="form-control-static">画像なし</p>
+                                @endif
+                                <input type="file" id="image" name="image_path" class="form-control mt-2">
+                            </div>
                         </div>
 
-
+                        <!-- 更新ボタンと戻るボタン -->
                         <div class="col-12 mb-2 mt-2">
                             <button type="submit" class="btn btn-primary w-100">更新する</button>
                             <a class="btn btn-secondary w-100 mt-2" href="{{ $showUrl }}">戻る</a>
