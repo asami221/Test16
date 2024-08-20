@@ -22,6 +22,8 @@ Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name
 Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
 Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
+
+
 // Additional routes
 Route::get('/test-image', function () {
     $path = storage_path('app/public/images/default_image.jpg');

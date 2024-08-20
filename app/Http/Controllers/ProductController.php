@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProductRequest;
 use App\Models\Company;
 use App\Models\Product;
+use App\Models\Sale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
@@ -15,17 +17,43 @@ class ProductController extends Controller
     {
         $query = Product::with('company');
 
+        // 商品名でフィルタリング
         if ($request->filled('query')) {
             $query->where('product_name', 'like', '%' . $request->input('query') . '%');
         }
 
+        // 会社名でフィルタリング
         if ($request->filled('mecaer')) {
             $query->whereHas('company', function($q) use ($request) {
                 $q->where('company_name', $request->input('mecaer'));
             });
         }
 
-        $products = $query->orderBy('id', 'asc')->paginate(5);
+        // 価格でフィルタリング
+        if ($request->filled('minPrice')) {
+            $query->where('price', '>=', $request->input('minPrice'));
+        }
+
+        if ($request->filled('maxPrice')) {
+            $query->where('price', '<=', $request->input('maxPrice'));
+        }
+
+        // 在庫数でフィルタリング
+        if ($request->filled('minStock')) {
+            $query->where('stock', '>=', $request->input('minStock'));
+        }
+
+        if ($request->filled('maxStock')) {
+            $query->where('stock', '<=', $request->input('maxStock'));
+        }
+
+       
+        $sortColumn = $request->input('sortColumn', 'id');
+        $sortOrder = $request->input('sortOrder', 'asc');
+        $query->orderBy($sortColumn, $sortOrder);
+
+    
+        $products = $query->paginate(5);
         $companies = Company::all();
 
         return view('index', compact('products', 'companies'))
@@ -42,9 +70,7 @@ class ProductController extends Controller
     // 商品詳細表示
     public function show($id)
     {
-        // Eager Loadingを使用してcompanyリレーションを読み込む
         $product = Product::with('company')->findOrFail($id);
-
         return view('show', compact('product'));
     }
 
@@ -52,32 +78,19 @@ class ProductController extends Controller
     public function store(ProductRequest $request)
     {
         try {
-            // バリデーション済みのデータを取得
             $validatedData = $request->validated();
-
-            // 新しい商品インスタンスを作成
             $product = new Product($validatedData);
 
             // 画像ファイルのアップロード処理
-            if ($request->hasFile('image_path')) {
-                $filePath = $request->file('image_path')->store('public/images');
-                Log::info('Uploaded file path: ' . $filePath); 
-                $product->image_path = basename($filePath); 
-            } else {
-                $product->image_path = 'default_image.jpg'; 
-            }
+            $product->image_path = $this->handleImageUpload($request, 'image_path');
 
             // データベースに保存
             $product->save();
 
-            // 成功メッセージ
             return redirect()->route('products.index')
                 ->with('success', __('products.success_create'));
         } catch (\Exception $e) {
-            // エラーログ
             Log::error('商品登録エラー: ' . $e->getMessage());
-
-            // エラーメッセージ
             return redirect()->route('products.index')
                 ->with('error', __('products.error_create'));
         }
@@ -86,93 +99,123 @@ class ProductController extends Controller
     // 商品編集画面表示
     public function edit($id)
     {
-        // 指定されたIDの商品を取得
         $product = Product::findOrFail($id);
         $companies = Company::all();
-    
-        // 詳細表示URLを生成
-        $showUrl = route('products.show', ['product' => $id]);  
-    
+
+        // 商品詳細ページのURLを生成
+        $showUrl = route('products.show', $product->id);
+
         return view('edit', compact('product', 'companies', 'showUrl'));
     }
-   
+
     // 商品更新処理
     public function update(ProductRequest $request, $id)
     {
         try {
-        // 指定されたIDの商品を取得
-        $product = Product::findOrFail($id);
+            $product = Product::findOrFail($id);
+            $validatedData = $request->validated();
+            
+            $validatedData['image_path'] = $this->handleImageUpload($request, 'image_path', $product->image_path);
 
-        // バリデーション済みのデータを取得
-        $validatedData = $request->validated();
-        Log::info('Validated data:', $validatedData);
+            $product->fill($validatedData);
+            $product->save();
 
-        // 画像ファイルのアップロード処理
-        if ($request->hasFile('image_path')) {
-            Log::info('Image file detected');
-    
-            if ($product->image_path && Storage::exists('public/images/' . $product->image_path)) {
-                Log::info('Deleting existing image: ' . $product->image_path);
-                Storage::delete('public/images/' . $product->image_path);
-            }
-
-            $file = $request->file('image_path');
-            $filePath = $file->store('images', 'public'); 
-            Log::info('Uploaded file path: ' . $filePath);
-
-    
-            $validatedData['image_path'] = basename($filePath);
-        }
-
-       
-        $product->fill($validatedData);
-
-        
-        $product->updated_at = now();
-        Log::info('Product updated successfully', $product->toArray());
-
-        // データベースに保存
-        $product->save();
-        Log::info('Product saved successfully');
-
-        
-        return redirect()->route('products.edit', $id)
-            ->with('success', __('products.success_update'));
+            return redirect()->route('products.edit', $id)
+                ->with('success', __('products.success_update'));
         } catch (\Exception $e) {
-      
-        Log::error('商品更新エラー: ' . $e->getMessage());
-
-        return redirect()->route('products.edit', $id)
-            ->with('error', __('products.error_update'));
+            Log::error('商品更新エラー: ' . $e->getMessage());
+            return redirect()->route('products.edit', $id)
+                ->with('error', __('products.error_update'));
         }
     }
-
-    
-
-    
 
     // 商品削除処理
     public function destroy($id)
     {
         try {
-            // 商品を検索して削除
-            $product = Product::findOrFail($id);
+            $product = Product::find($id);
+
+            if (!$product) {
+                Log::warning("削除しようとした商品が存在しません: ID {$id}");
+                return redirect()->route('products.index')
+                    ->with('error', '指定された商品は存在しません。');
+            }
+
             // 画像ファイルがあれば削除
             if ($product->image_path && Storage::exists('public/images/' . $product->image_path)) {
                 Storage::delete('public/images/' . $product->image_path);
             }
+
             $product->delete();
 
-            // 成功メッセージをフラッシュデータに追加してリダイレクト
             return redirect()->route('products.index')
                 ->with('success', __('products.success_delete'));
         } catch (\Exception $e) {
-            // エラーログの記録
             Log::error('商品削除エラー: ' . $e->getMessage());
-
-            // エラーメッセージをフラッシュデータに追加してリダイレクト
             return redirect()->route('products.index')
                 ->with('error', __('products.error_delete'));
         }
+    }
+
+    // 購入処理メソッド
+    public function purchase(Request $request)
+    {
+        $productId = $request->input('product_id');
+        $quantity = $request->input('quantity');
+
+  
+        DB::beginTransaction();
+
+        try {
+            $product = Product::find($productId);
+
+            if (!$product) {
+                return response()->json(['error' => 'Product not found'], 404);
+            }
+
+            if ($product->stock < $quantity) {
+                return response()->json(['error' => 'Insufficient stock'], 400);
+            }
+
+            // salesテーブルにレコードを追加
+            Sale::create([
+                'product_id' => $productId,
+                'quantity' => $quantity,
+                'price' => $product->price,
+            ]);
+
+            // productsテーブルの在庫数を減算
+            $product->stock -= $quantity;
+            $product->save();
+
+            // コミットしてトランザクションを完了
+            DB::commit();
+
+            return response()->json(['success' => 'Purchase completed'], 200);
+
+        } catch (\Exception $e) {
+            // エラーが発生した場合はロールバック
+            DB::rollBack();
+            Log::error('購入処理エラー: ' . $e->getMessage());
+            return response()->json(['error' => 'Purchase failed', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    // 画像のアップロード処理
+    private function handleImageUpload(Request $request, $fieldName, $default = null)
+    {
+        if ($request->hasFile($fieldName)) {
+            $file = $request->file($fieldName);
+
+            // 既存の画像があれば削除
+            if ($default && Storage::exists('public/images/' . $default)) {
+                Storage::delete('public/images/' . $default);
+            }
+
+            $filePath = $file->store('images', 'public');
+            return basename($filePath);
+        }
+
+        return $default;
     }
 }
