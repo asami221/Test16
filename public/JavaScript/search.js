@@ -1,74 +1,93 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const searchButton = document.getElementById('searchButton');
-    const searchResults = document.getElementById('searchResults');
+$(document).ready(function() {
+    // 商品削除のイベントリスナーを追加
+    function addDeleteEventListeners() {
+        $(document).on('submit', '.delete-form', function(event) {
+            event.preventDefault();
 
-    searchButton.addEventListener('click', function() {
-        const params = new URLSearchParams({
-            query: document.getElementById('query').value,
-            minPrice: document.getElementById('minPrice').value,
-            maxPrice: document.getElementById('maxPrice').value,
-            minStock: document.getElementById('minStock').value,
-            maxStock: document.getElementById('maxStock').value,
-            sortColumn: 'id',
-            sortOrder: 'desc'
-        });
+            if (confirm('削除しますか？')) {
+                const form = $(this);
+                const productId = form.data('id');
 
-        fetch(`/api/products/search?${params.toString()}`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json'
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'Accept': 'application/json'
+                    },
+                    success: function(data) {
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            $(`#product-${productId}`).remove();
+                            alert(data.success);
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('削除エラー:', xhr.responseText);
+                        alert('削除エラーが発生しました。');
+                    }
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => displayResults(data))
-        .catch(error => console.error('検索エラー:', error));
+        });
+    }
+
+    // 検索結果の更新
+    function updateSearchResults() {
+        const query = $('#query').val();
+        const mecaer = $('#mecaer').val();
+        const minPrice = $('#minPrice').val();
+        const maxPrice = $('#maxPrice').val();
+        const minStock = $('#minStock').val();
+        const maxStock = $('#maxStock').val();
+
+        const formData = {
+            query: query,
+            mecaer: mecaer,
+            minPrice: minPrice,
+            maxPrice: maxPrice,
+            minStock: minStock,
+            maxStock: maxStock
+        };
+
+        $.ajax({
+            url: $('#search-form').attr('action'),
+            type: $('#search-form').attr('method'),
+            data: formData,
+            success: function(data) {
+                if (data.resultsHtml) {
+                    $('#searchResults').html(data.resultsHtml);
+                } else {
+                    console.error('無効なデータ形式:', data);
+                    alert('無効なデータ形式が返されました。');
+                }
+            },
+            error: function(xhr) {
+                console.error('検索エラー:', xhr.responseText);
+                alert('検索エラーが発生しました。');
+            }
+        });
+    }
+
+    // 検索ボタンにクリックイベントを追加
+    $('#searchButton').on('click', function() {
+        updateSearchResults();
     });
 
-    function displayResults(results) {
-        searchResults.innerHTML = '';
-        if (results.length > 0) {
-            results.forEach(result => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${result.id}</td>
-                    <td><img src="${result.image_path}" alt="商品画像" style="max-width: 100px;"></td>
-                    <td>${result.product_name}</td>
-                    <td>¥${result.price}</td>
-                    <td>${result.stock}</td>
-                    <td>${result.company_name || 'N/A'}</td>
-                    <td><button class="delete-button" data-id="${result.id}">削除</button></td>
-                `;
-                searchResults.appendChild(row);
-            });
-            addDeleteEventListeners();
-        } else {
-            searchResults.innerHTML = '<tr><td colspan="7">該当する商品が見つかりませんでした。</td></tr>';
+    // 入力フィールドでEnterキーが押されたときに検索をトリガー
+    $('#query, #mecaer, #minPrice, #maxPrice, #minStock, #maxStock').on('keypress', function(e) {
+        if (e.which === 13) { // Enterキーが押されたとき
+            e.preventDefault();
+            updateSearchResults();
         }
-    }
+    });
 
-    function addDeleteEventListeners() {
-        document.querySelectorAll('.delete-button').forEach(button => {
-            button.addEventListener('click', function() {
-                const productId = this.getAttribute('data-id');
-                if (confirm('削除しますか？')) {
-                    fetch(`/api/products/${productId}`, {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            document.querySelector(`tr[data-id="${productId}"]`).remove();
-                        } else {
-                            alert(data.error || '削除に失敗しました。');
-                        }
-                    })
-                    .catch(error => console.error('削除エラー:', error));
-                }
-            });
-        });
-    }
+    // 検索フォームの送信イベントをハンドリング
+    $('#search-form').on('submit', function(event) {
+        event.preventDefault();
+        updateSearchResults();
+    });
+
+    // ページ読み込み時に削除イベントリスナーを追加
+    addDeleteEventListeners();
 });

@@ -17,15 +17,37 @@ class ProductController extends Controller
     {
         $query = Product::with('company');
 
+        // フィルタリング処理
+        $this->applyFilters($request, $query);
+
+        // 並び替え処理
+        $sortColumn = $request->input('sortColumn', 'id');
+        $sortOrder = $request->input('sortOrder', 'asc');
+        $query->orderBy($sortColumn, $sortOrder);
+
+        // ページネーションとビューへのデータ渡し
+        $products = $query->paginate(5);
+        $companies = Company::all();
+
+        return view('index', [
+            'products' => $products,
+            'companies' => $companies,
+            'i' => ($request->input('page', 1) - 1) * 5
+        ]);
+    }
+
+    // 商品フィルタリング処理
+    private function applyFilters(Request $request, $query)
+    {
         // 商品名でフィルタリング
         if ($request->filled('query')) {
             $query->where('product_name', 'like', '%' . $request->input('query') . '%');
         }
 
-        // 会社名でフィルタリング
-        if ($request->filled('mecaer')) {
-            $query->whereHas('company', function($q) use ($request) {
-                $q->where('company_name', $request->input('mecaer'));
+        // メーカー名でフィルタリング
+        if ($request->filled('manufacturer')) {
+            $query->whereHas('company', function ($q) use ($request) {
+                $q->where('company_name', $request->input('manufacturer'));
             });
         }
 
@@ -46,18 +68,6 @@ class ProductController extends Controller
         if ($request->filled('maxStock')) {
             $query->where('stock', '<=', $request->input('maxStock'));
         }
-
-       
-        $sortColumn = $request->input('sortColumn', 'id');
-        $sortOrder = $request->input('sortOrder', 'asc');
-        $query->orderBy($sortColumn, $sortOrder);
-
-    
-        $products = $query->paginate(5);
-        $companies = Company::all();
-
-        return view('index', compact('products', 'companies'))
-            ->with('i', ($request->input('page', 1) - 1) * 5);
     }
 
     // フォーム表示
@@ -114,7 +124,8 @@ class ProductController extends Controller
         try {
             $product = Product::findOrFail($id);
             $validatedData = $request->validated();
-            
+
+            // 画像ファイルのアップロード処理
             $validatedData['image_path'] = $this->handleImageUpload($request, 'image_path', $product->image_path);
 
             $product->fill($validatedData);
@@ -133,18 +144,10 @@ class ProductController extends Controller
     public function destroy($id)
     {
         try {
-            $product = Product::find($id);
-
-            if (!$product) {
-                Log::warning("削除しようとした商品が存在しません: ID {$id}");
-                return redirect()->route('products.index')
-                    ->with('error', '指定された商品は存在しません。');
-            }
+            $product = Product::findOrFail($id);
 
             // 画像ファイルがあれば削除
-            if ($product->image_path && Storage::exists('public/images/' . $product->image_path)) {
-                Storage::delete('public/images/' . $product->image_path);
-            }
+            $this->deleteImage($product->image_path);
 
             $product->delete();
 
@@ -160,26 +163,19 @@ class ProductController extends Controller
     // 購入処理メソッド
     public function purchase(Request $request)
     {
-        $productId = $request->input('product_id');
-        $quantity = $request->input('quantity');
-
-  
         DB::beginTransaction();
 
         try {
-            $product = Product::find($productId);
-
-            if (!$product) {
-                return response()->json(['error' => 'Product not found'], 404);
-            }
+            $product = Product::findOrFail($request->input('product_id'));
+            $quantity = $request->input('quantity');
 
             if ($product->stock < $quantity) {
-                return response()->json(['error' => 'Insufficient stock'], 400);
+                return response()->json(['error' => '在庫が不足しています'], 400);
             }
 
             // salesテーブルにレコードを追加
             Sale::create([
-                'product_id' => $productId,
+                'product_id' => $product->id,
                 'quantity' => $quantity,
                 'price' => $product->price,
             ]);
@@ -191,13 +187,13 @@ class ProductController extends Controller
             // コミットしてトランザクションを完了
             DB::commit();
 
-            return response()->json(['success' => 'Purchase completed'], 200);
+            return response()->json(['success' => '購入が完了しました'], 200);
 
         } catch (\Exception $e) {
             // エラーが発生した場合はロールバック
             DB::rollBack();
             Log::error('購入処理エラー: ' . $e->getMessage());
-            return response()->json(['error' => 'Purchase failed', 'message' => $e->getMessage()], 500);
+            return response()->json(['error' => '購入処理に失敗しました', 'message' => $e->getMessage()], 500);
         }
     }
 
@@ -208,8 +204,8 @@ class ProductController extends Controller
             $file = $request->file($fieldName);
 
             // 既存の画像があれば削除
-            if ($default && Storage::exists('public/images/' . $default)) {
-                Storage::delete('public/images/' . $default);
+            if ($default) {
+                $this->deleteImage($default);
             }
 
             $filePath = $file->store('images', 'public');
@@ -217,5 +213,13 @@ class ProductController extends Controller
         }
 
         return $default;
+    }
+
+    // 画像の削除処理
+    private function deleteImage($imagePath)
+    {
+        if ($imagePath && Storage::exists('public/images/' . $imagePath)) {
+            Storage::delete('public/images/' . $imagePath);
+        }
     }
 }

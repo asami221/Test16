@@ -58,25 +58,25 @@
         </thead>
         <tbody id="searchResults">
         @foreach ($products as $product)
-                <tr id="product-{{ $product->id }}">
-                    <td>{{ $product->id }}</td>
-                    <td>
-                        <img src="{{ asset('storage/images/' . $product->image_path) }}" alt="商品画像" style="max-width: 200px;">
-                    </td>
-                    <td>{{ $product->product_name }}</td>
-                    <td>¥{{ $product->price }}</td>
-                    <td>{{ $product->stock }}</td>
-                    <td>{{ $product->company ? $product->company->company_name : 'N/A' }}</td>
-                    <td>
-                        <a href="{{ route('products.show', $product->id) }}" class="btn btn-warning">詳細</a>
-                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="delete-form" data-id="{{ $product->id }}" style="display:inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">削除</button>
-                        </form>
-                    </td>
-                </tr>
-            @endforeach
+            <tr id="product-{{ $product->id }}">
+                <td>{{ $product->id }}</td>
+                <td>
+                    <img src="{{ asset('storage/images/' . $product->image_path) }}" alt="商品画像" style="max-width: 200px;">
+                </td>
+                <td>{{ $product->product_name }}</td>
+                <td>¥{{ $product->price }}</td>
+                <td>{{ $product->stock }}</td>
+                <td>{{ $product->company ? $product->company->company_name : 'N/A' }}</td>
+                <td>
+                    <a href="{{ route('products.show', $product->id) }}" class="btn btn-warning">詳細</a>
+                    <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="delete-form" data-id="{{ $product->id }}" style="display:inline;">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger">削除</button>
+                    </form>
+                </td>
+            </tr>
+        @endforeach
         </tbody>
     </table>
     <div class="pagination">
@@ -84,7 +84,5 @@
     </div>
 </div>
 
-
-<script src="{{ asset('js/main.js') }}"></script>
-
+<script src="{{ asset('js/search.js') }}"></script>
 @endsection

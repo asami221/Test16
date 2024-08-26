@@ -13,7 +13,7 @@ Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
 
-// Explicit routes for products
+// 明示的な商品ルート
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
 Route::post('/products', [ProductController::class, 'store'])->name('products.store');
@@ -22,19 +22,18 @@ Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name
 Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
 Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
+// 商品購入処理ルート
+Route::post('/products/purchase', [ProductController::class, 'purchase'])->name('products.purchase');
 
+// 商品検索ルート
+Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
 
-// Additional routes
+// 画像のテスト表示
 Route::get('/test-image', function () {
     $path = storage_path('app/public/images/default_image.jpg');
     if (file_exists($path)) {
         return response()->file($path);
     } else {
-        return "File does not exist";
+        return response("File does not exist", 404);
     }
-});
-
-// Redirect after login
-Route::get('/index', function () {
-    return view('index');
 });
