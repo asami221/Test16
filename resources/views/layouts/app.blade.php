@@ -14,9 +14,19 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
     <!-- Scripts -->
-    
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script> 
+    
+    <!-- jQuery (必要な順序を守る) -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js" integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    
+    <!-- Tablesorter CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tablesorter/2.31.3/css/theme.default.min.css">
+
+    <!-- Tablesorter JS (jQueryの後にロード) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tablesorter/2.31.3/js/jquery.tablesorter.min.js"></script>
+
+    <!-- Custom Scripts (最後にロード) -->
+    <script src="{{ asset('javascript/product.js') }}"></script>
 </head>
 <body>
     <div id="app">
@@ -32,7 +42,7 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
-
+                        <!-- 空のリスト、必要なら追加してください -->
                     </ul>
 
                     <!-- Right Side Of Navbar -->

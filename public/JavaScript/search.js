@@ -1,5 +1,13 @@
 $(document).ready(function() {
-    // 商品削除のイベントリスナーを追加
+   
+    $("#productTable").tablesorter({
+        theme: 'default',
+        headers: {
+            4: { sorter: false } 
+        }
+    });
+
+   
     function addDeleteEventListeners() {
         $(document).on('submit', '.delete-form', function(event) {
             event.preventDefault();
@@ -10,22 +18,23 @@ $(document).ready(function() {
 
                 $.ajax({
                     url: form.attr('action'),
-                    type: 'DELETE',
+                    type: 'POST', 
+                    data: form.serialize(), 
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
                         'Accept': 'application/json'
                     },
                     success: function(data) {
-                        if (data.error) {
-                            alert(data.error);
-                        } else {
-                            $(`#product-${productId}`).remove();
-                            alert(data.success);
-                        }
+                        // 成功時の処理
+                        $(`#product-${productId}`).fadeOut(300, function() {
+                            $(this).remove();
+                            $("#productTable").trigger("update"); 
+                        });
+                        alert(data.success);
                     },
                     error: function(xhr) {
+                        // エラー時の処理
                         console.error('削除エラー:', xhr.responseText);
-                        alert('削除エラーが発生しました。');
                     }
                 });
             }
@@ -57,6 +66,7 @@ $(document).ready(function() {
             success: function(data) {
                 if (data.resultsHtml) {
                     $('#searchResults').html(data.resultsHtml);
+                    $("#productTable").trigger("update"); // テーブルを更新
                 } else {
                     console.error('無効なデータ形式:', data);
                     alert('無効なデータ形式が返されました。');
@@ -69,25 +79,20 @@ $(document).ready(function() {
         });
     }
 
-    // 検索ボタンにクリックイベントを追加
-    $('#searchButton').on('click', function() {
-        updateSearchResults();
-    });
-
-    // 入力フィールドでEnterキーが押されたときに検索をトリガー
-    $('#query, #mecaer, #minPrice, #maxPrice, #minStock, #maxStock').on('keypress', function(e) {
-        if (e.which === 13) { // Enterキーが押されたとき
-            e.preventDefault();
-            updateSearchResults();
-        }
-    });
-
-    // 検索フォームの送信イベントをハンドリング
+   
     $('#search-form').on('submit', function(event) {
         event.preventDefault();
         updateSearchResults();
     });
 
-    // ページ読み込み時に削除イベントリスナーを追加
+   
+    $('#query, #mecaer, #minPrice, #maxPrice, #minStock, #maxStock').on('keypress', function(e) {
+        if (e.which === 13) { 
+            e.preventDefault();
+            updateSearchResults();
+        }
+    });
+
+    
     addDeleteEventListeners();
 });

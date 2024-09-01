@@ -20,12 +20,8 @@ Route::post('/products', [ProductController::class, 'store'])->name('products.st
 Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
 Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
 Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
-
-// 商品購入処理ルート
+Route::post('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy'); // DELETE → POST に変更
 Route::post('/products/purchase', [ProductController::class, 'purchase'])->name('products.purchase');
-
-// 商品検索ルート
 Route::get('/products/search', [ProductController::class, 'search'])->name('products.search');
 
 // 画像のテスト表示

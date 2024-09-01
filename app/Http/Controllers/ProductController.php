@@ -146,10 +146,11 @@ class ProductController extends Controller
         try {
             $product = Product::findOrFail($id);
 
+            // 商品削除処理
+            $product->delete();
+
             // 画像ファイルがあれば削除
             $this->deleteImage($product->image_path);
-
-            $product->delete();
 
             return redirect()->route('products.index')
                 ->with('success', __('products.success_delete'));

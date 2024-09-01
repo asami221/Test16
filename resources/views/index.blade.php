@@ -6,22 +6,50 @@
 
 @section('search_form')
 <div class="search-bar">
-    <input type="text" id="query" placeholder="商品名を入力してください" value="{{ request('query') }}">
-    <select id="mecaer">
-        <option value="">メーカー名</option>
-        @foreach($companies as $company)
-            <option value="{{ $company->company_name }}" {{ request('mecaer') == $company->company_name ? 'selected' : '' }}>
-                {{ $company->company_name }}
-            </option>
-        @endforeach
-    </select>
-    <input type="number" id="minPrice" placeholder="価格下限" value="{{ request('minPrice') }}">
-    <input type="number" id="maxPrice" placeholder="価格上限" value="{{ request('maxPrice') }}">
-    <input type="number" id="minStock" placeholder="在庫数下限" value="{{ request('minStock') }}">
-    <input type="number" id="maxStock" placeholder="在庫数上限" value="{{ request('maxStock') }}">
-    <button id="searchButton">検索</button>
+    <form id="search-form" action="{{ route('products.index') }}" method="GET">
+        <div class="form-group">
+            <label for="query">商品名</label>
+            <input type="text" id="query" name="query" placeholder="商品名を入力してください" value="{{ request('query') }}">
+        </div>
+        
+        <div class="form-group">
+            <label for="manufacturer">メーカー名</label>
+            <select id="manufacturer" name="manufacturer">
+                <option value="">メーカー名</option>
+                @foreach($companies as $company)
+                    <option value="{{ $company->company_name }}" {{ request('manufacturer') == $company->company_name ? 'selected' : '' }}>
+                        {{ $company->company_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="minPrice">価格(下限)</label>
+            <input type="number" id="minPrice" name="minPrice" placeholder="価格下限" value="{{ request('minPrice') }}" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="maxPrice">価格(上限)</label>
+            <input type="number" id="maxPrice" name="maxPrice" placeholder="価格上限" value="{{ request('maxPrice') }}" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="minStock">在庫数(下限)</label>
+            <input type="number" id="minStock" name="minStock" placeholder="在庫数下限" value="{{ request('minStock') }}" min="0">
+        </div>
+        
+        <div class="form-group">
+            <label for="maxStock">在庫数(上限)</label>
+            <input type="number" id="maxStock" name="maxStock" placeholder="在庫数上限" value="{{ request('maxStock') }}" min="0">
+        </div>
+        
+        <button type="submit">検索</button>
+    </form>
 </div>
 @endsection
+
+
 
 @section('content')
 <link rel="stylesheet" href="{{ asset('css/index.css') }}">
@@ -44,7 +72,7 @@
     <!-- 検索フォームを表示 -->
     @yield('search_form')
     
-    <table class="table">
+    <table class="table tablesorter">
         <thead>
             <tr>
                 <th data-sort="id">ID</th>
@@ -57,26 +85,26 @@
             </tr>
         </thead>
         <tbody id="searchResults">
-        @foreach ($products as $product)
-            <tr id="product-{{ $product->id }}">
-                <td>{{ $product->id }}</td>
-                <td>
-                    <img src="{{ asset('storage/images/' . $product->image_path) }}" alt="商品画像" style="max-width: 200px;">
-                </td>
-                <td>{{ $product->product_name }}</td>
-                <td>¥{{ $product->price }}</td>
-                <td>{{ $product->stock }}</td>
-                <td>{{ $product->company ? $product->company->company_name : 'N/A' }}</td>
-                <td>
-                    <a href="{{ route('products.show', $product->id) }}" class="btn btn-warning">詳細</a>
-                    <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="delete-form" data-id="{{ $product->id }}" style="display:inline;">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger">削除</button>
-                    </form>
-                </td>
-            </tr>
-        @endforeach
+            @foreach ($products as $product)
+                <tr id="product-{{ $product->id }}">
+                    <td>{{ $product->id }}</td>
+                    <td>
+                        <img src="{{ asset('storage/images/' . $product->image_path) }}" alt="商品画像" style="max-width: 200px;">
+                    </td>
+                    <td>{{ $product->product_name }}</td>
+                    <td>¥{{ $product->price }}</td>
+                    <td>{{ $product->stock }}</td>
+                    <td>{{ $product->company ? $product->company->company_name : 'N/A' }}</td>
+                    <td>
+                        <a href="{{ route('products.show', $product->id) }}" class="btn btn-warning">詳細</a>
+                        <form action="{{ route('products.destroy', $product->id) }}" method="POST" class="delete-form" data-id="{{ $product->id }}" style="display:inline;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger">削除</button>
+                        </form>
+                    </td>
+                </tr>
+            @endforeach
         </tbody>
     </table>
     <div class="pagination">
@@ -84,5 +112,5 @@
     </div>
 </div>
 
-<script src="{{ asset('js/search.js') }}"></script>
+
 @endsection
