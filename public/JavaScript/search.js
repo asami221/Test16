@@ -1,16 +1,66 @@
 $(document).ready(function() {
-   
+    // テーブルソートの初期化
     $("#productTable").tablesorter({
         theme: 'default',
         headers: {
-            4: { sorter: false } 
+            4: { sorter: false }  
         }
     });
 
-   
+    // ローディングインジケーターの表示
+    function showLoading() {
+        $('#loading-indicator').show();
+    }
+
+    // ローディングインジケーターの非表示
+    function hideLoading() {
+        $('#loading-indicator').hide();
+    }
+
+    // 検索結果を更新する関数
+    function updateSearchResults() {
+        var formData = $('#search-form').serialize();  
+
+        $.ajax({
+            url: $('#search-form').attr('action'),  
+            method: $('#search-form').attr('method'),
+            type: 'GET', 
+            data: formData,  
+            beforeSend: function() {
+                showLoading();  
+            },
+            success: function(response) {
+                
+                $('#searchResults').html(response.html);  
+                $("#productTable").trigger("update");  
+                hideLoading();  
+            },
+            error: function(xhr, status, error) {
+                console.error('検索エラー:', xhr.responseText);
+                alert("検索中にエラーが発生しました。");
+                hideLoading();
+            }
+        });
+    }
+
+    
+    $('#search-form').on('submit', function(event) {
+        event.preventDefault();  
+        updateSearchResults();  
+    });
+
+    // Enterキーで検索を実行
+    $('#query, #manufacturer, #minPrice, #maxPrice, #minStock, #maxStock').on('keypress', function(e) {
+        if (e.which === 13) {  
+            e.preventDefault();  
+            updateSearchResults();  
+        }
+    });
+
+    // 削除イベントの設定
     function addDeleteEventListeners() {
         $(document).on('submit', '.delete-form', function(event) {
-            event.preventDefault();
+            event.preventDefault();  
 
             if (confirm('削除しますか？')) {
                 const form = $(this);
@@ -18,81 +68,27 @@ $(document).ready(function() {
 
                 $.ajax({
                     url: form.attr('action'),
-                    type: 'POST', 
-                    data: form.serialize(), 
+                    type: 'POST',  
+                    data: form.serialize(),
                     headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content'),  
                         'Accept': 'application/json'
                     },
                     success: function(data) {
-                        // 成功時の処理
                         $(`#product-${productId}`).fadeOut(300, function() {
-                            $(this).remove();
-                            $("#productTable").trigger("update"); 
+                            $(this).remove();  
+                            $("#productTable").trigger("update");  
                         });
-                        alert(data.success);
+                        alert(data.success || '削除に成功しました。');
                     },
                     error: function(xhr) {
-                        // エラー時の処理
                         console.error('削除エラー:', xhr.responseText);
+                        alert('削除中にエラーが発生しました。');
                     }
                 });
             }
         });
     }
 
-    // 検索結果の更新
-    function updateSearchResults() {
-        const query = $('#query').val();
-        const mecaer = $('#mecaer').val();
-        const minPrice = $('#minPrice').val();
-        const maxPrice = $('#maxPrice').val();
-        const minStock = $('#minStock').val();
-        const maxStock = $('#maxStock').val();
-
-        const formData = {
-            query: query,
-            mecaer: mecaer,
-            minPrice: minPrice,
-            maxPrice: maxPrice,
-            minStock: minStock,
-            maxStock: maxStock
-        };
-
-        $.ajax({
-            url: $('#search-form').attr('action'),
-            type: $('#search-form').attr('method'),
-            data: formData,
-            success: function(data) {
-                if (data.resultsHtml) {
-                    $('#searchResults').html(data.resultsHtml);
-                    $("#productTable").trigger("update"); // テーブルを更新
-                } else {
-                    console.error('無効なデータ形式:', data);
-                    alert('無効なデータ形式が返されました。');
-                }
-            },
-            error: function(xhr) {
-                console.error('検索エラー:', xhr.responseText);
-                alert('検索エラーが発生しました。');
-            }
-        });
-    }
-
-   
-    $('#search-form').on('submit', function(event) {
-        event.preventDefault();
-        updateSearchResults();
-    });
-
-   
-    $('#query, #mecaer, #minPrice, #maxPrice, #minStock, #maxStock').on('keypress', function(e) {
-        if (e.which === 13) { 
-            e.preventDefault();
-            updateSearchResults();
-        }
-    });
-
-    
-    addDeleteEventListeners();
+    addDeleteEventListeners();  
 });

@@ -21,37 +21,52 @@ class ProductController extends Controller
         $this->applyFilters($request, $query);
 
         // 並び替え処理
-        $sortColumn = $request->input('sortColumn', 'id');
-        $sortOrder = $request->input('sortOrder', 'asc');
+        $sortColumn = $request->input('sortColumn', 'id');  
+        $sortOrder = $request->input('sortOrder', 'asc'); 
         $query->orderBy($sortColumn, $sortOrder);
 
-        // ページネーションとビューへのデータ渡し
-        $products = $query->paginate(5);
-        $companies = Company::all();
+        
+        $products = $query->paginate(5);  
+        $companies = Company::all(); 
 
         return view('index', [
             'products' => $products,
             'companies' => $companies,
-            'i' => ($request->input('page', 1) - 1) * 5
+            'i' => ($request->input('page', 1) - 1) * 5  
         ]);
     }
-
-    // 商品フィルタリング処理
+     // 商品検索機能
+     public function search(Request $request)
+     {
+         try {
+             $query = Product::with('company');
+     
+             $this->applyFilters($request, $query);
+     
+             $products = $query->get();
+     
+             return view('products.searchResults', compact('products'))->render();
+         } catch (\Exception $e) {
+             Log::error('検索エラー: ' . $e->getMessage());
+             return response()->json(['error' => '検索に失敗しました'], 500);
+         }
+     }
+     
+    
     private function applyFilters(Request $request, $query)
     {
-        // 商品名でフィルタリング
+       
         if ($request->filled('query')) {
             $query->where('product_name', 'like', '%' . $request->input('query') . '%');
         }
 
-        // メーカー名でフィルタリング
         if ($request->filled('manufacturer')) {
             $query->whereHas('company', function ($q) use ($request) {
                 $q->where('company_name', $request->input('manufacturer'));
             });
         }
 
-        // 価格でフィルタリング
+        
         if ($request->filled('minPrice')) {
             $query->where('price', '>=', $request->input('minPrice'));
         }
@@ -60,7 +75,7 @@ class ProductController extends Controller
             $query->where('price', '<=', $request->input('maxPrice'));
         }
 
-        // 在庫数でフィルタリング
+ 
         if ($request->filled('minStock')) {
             $query->where('stock', '>=', $request->input('minStock'));
         }
@@ -70,25 +85,25 @@ class ProductController extends Controller
         }
     }
 
-    // フォーム表示
+
     public function create()
     {
-        $companies = Company::all();
+        $companies = Company::all();  
         return view('create', compact('companies'));
     }
 
     // 商品詳細表示
     public function show($id)
     {
-        $product = Product::with('company')->findOrFail($id);
+        $product = Product::with('company')->findOrFail($id); 
         return view('show', compact('product'));
     }
 
-    // 商品登録処理
+    // 新商品登録処理
     public function store(ProductRequest $request)
     {
         try {
-            $validatedData = $request->validated();
+            $validatedData = $request->validated();  
             $product = new Product($validatedData);
 
             // 画像ファイルのアップロード処理
@@ -98,21 +113,19 @@ class ProductController extends Controller
             $product->save();
 
             return redirect()->route('products.index')
-                ->with('success', __('products.success_create'));
+                ->with('success', __('products.success_create'));  
         } catch (\Exception $e) {
             Log::error('商品登録エラー: ' . $e->getMessage());
             return redirect()->route('products.index')
-                ->with('error', __('products.error_create'));
+                ->with('error', __('products.error_create'));  
         }
     }
 
     // 商品編集画面表示
     public function edit($id)
     {
-        $product = Product::findOrFail($id);
-        $companies = Company::all();
-
-        // 商品詳細ページのURLを生成
+        $product = Product::findOrFail($id);  
+        $companies = Company::all();  
         $showUrl = route('products.show', $product->id);
 
         return view('edit', compact('product', 'companies', 'showUrl'));
@@ -122,8 +135,8 @@ class ProductController extends Controller
     public function update(ProductRequest $request, $id)
     {
         try {
-            $product = Product::findOrFail($id);
-            $validatedData = $request->validated();
+            $product = Product::findOrFail($id);  
+            $validatedData = $request->validated();  
 
             // 画像ファイルのアップロード処理
             $validatedData['image_path'] = $this->handleImageUpload($request, 'image_path', $product->image_path);
@@ -132,11 +145,11 @@ class ProductController extends Controller
             $product->save();
 
             return redirect()->route('products.edit', $id)
-                ->with('success', __('products.success_update'));
+                ->with('success', __('products.success_update'));  
         } catch (\Exception $e) {
             Log::error('商品更新エラー: ' . $e->getMessage());
             return redirect()->route('products.edit', $id)
-                ->with('error', __('products.error_update'));
+                ->with('error', __('products.error_update'));  
         }
     }
 
@@ -144,7 +157,7 @@ class ProductController extends Controller
     public function destroy($id)
     {
         try {
-            $product = Product::findOrFail($id);
+            $product = Product::findOrFail($id);  
 
             // 商品削除処理
             $product->delete();
@@ -152,16 +165,14 @@ class ProductController extends Controller
             // 画像ファイルがあれば削除
             $this->deleteImage($product->image_path);
 
-            return redirect()->route('products.index')
-                ->with('success', __('products.success_delete'));
+            return response()->json(['success' => '商品が削除されました'], 200, [], JSON_UNESCAPED_UNICODE);
         } catch (\Exception $e) {
             Log::error('商品削除エラー: ' . $e->getMessage());
-            return redirect()->route('products.index')
-                ->with('error', __('products.error_delete'));
+            return response()->json(['error' => '削除に失敗しました'], 500);
         }
     }
 
-    // 購入処理メソッド
+    // 購入処理
     public function purchase(Request $request)
     {
         DB::beginTransaction();
@@ -170,28 +181,29 @@ class ProductController extends Controller
             $product = Product::findOrFail($request->input('product_id'));
             $quantity = $request->input('quantity');
 
+            // 在庫確認
             if ($product->stock < $quantity) {
                 return response()->json(['error' => '在庫が不足しています'], 400);
             }
 
-            // salesテーブルにレコードを追加
+            
             Sale::create([
                 'product_id' => $product->id,
                 'quantity' => $quantity,
                 'price' => $product->price,
             ]);
 
-            // productsテーブルの在庫数を減算
+            
             $product->stock -= $quantity;
             $product->save();
 
-            // コミットしてトランザクションを完了
+        
             DB::commit();
 
             return response()->json(['success' => '購入が完了しました'], 200);
 
         } catch (\Exception $e) {
-            // エラーが発生した場合はロールバック
+            
             DB::rollBack();
             Log::error('購入処理エラー: ' . $e->getMessage());
             return response()->json(['error' => '購入処理に失敗しました', 'message' => $e->getMessage()], 500);
@@ -204,12 +216,12 @@ class ProductController extends Controller
         if ($request->hasFile($fieldName)) {
             $file = $request->file($fieldName);
 
-            // 既存の画像があれば削除
+            
             if ($default) {
                 $this->deleteImage($default);
             }
 
-            $filePath = $file->store('images', 'public');
+            $filePath = $file->store('images', 'public');  // 画像をstorage/public/imagesに保存
             return basename($filePath);
         }
 
@@ -220,7 +232,7 @@ class ProductController extends Controller
     private function deleteImage($imagePath)
     {
         if ($imagePath && Storage::exists('public/images/' . $imagePath)) {
-            Storage::delete('public/images/' . $imagePath);
+            Storage::delete('public/images/' . $imagePath);  // 画像ファイルを削除
         }
     }
 }
