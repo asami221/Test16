@@ -19,11 +19,12 @@
     <!-- jQuery (必要な順序を守る) -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
     
-    <!-- Tablesorter CSS -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tablesorter/2.32.0/css/theme.default.min.css">  -->
-
     <!-- Tablesorter JS (jQueryの後にロード) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.32.0/js/jquery.tablesorter.min.js"></script>
+
+    <head>
+    @stack('styles')
+    </head>
 
     <!-- Custom Scripts (最後にロード) -->
     <script src="{{ asset('JavaScript/search.js') }}"></script>

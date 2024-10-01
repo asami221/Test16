@@ -1,79 +1,101 @@
 .search-bar {
     margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f9f9f9; 
+    border-radius: 6px; 
 }
 
 h1 {
     text-align: left;
-    margin-left: 20px; /
+    margin-left: 100px;
+    font-size: 30px;
+    color: #333; 
 }
 
 .search-bar form {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap; 
+    flex-wrap: wrap;
 }
 
 .search-bar input,
 .search-bar select,
 .search-bar button {
-    padding: 5px;
+    padding: 8px; 
     border: 1px solid #ccc;
-    border-radius: 4px; 
+    border-radius: 4px;
+    font-size: 14px;
+    width: 100%; 
+    max-width: 250px; 
+}
+
+.search-bar button {
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+.search-bar button:hover {
+    background-color: #0056b3; 
 }
 
 .container {
     margin-top: 20px;
+    padding: 0 20px;
 }
 
 .table {
-    width: 100%; 
+    width: 100%;
     margin-bottom: 20px;
     border-collapse: collapse;
 }
 
 .table th,
 .table td {
-    border: 1px solid #ddd; 
-    padding: 8px; 
+    border: 1px solid #ddd;
+    padding: 12px; 
+    text-align: center;
+    vertical-align: middle; 
 }
 
 .table th {
-    background-color: #f9f9f9; 
-    text-align: center;
+    background-color: #f9f9f9;
+    font-weight: bold;
 }
 
 .product-image {
     width: 100px;
     height: auto;
-    max-width: 100%; 
+    max-width: 100%;
 }
 
 .btn {
-    padding: 6px 12px;  
+    padding: 6px 12px;
     border: none;
     border-radius: 4px;
     text-decoration: none;
     color: #fff;
     cursor: pointer;
-    font-size: 14px; 
+    font-size: 14px;
+    display: inline-block; 
 }
 
 .btn-primary {
-    background-color: #6c757d; 
+    background-color: blue;
 }
 
 .btn-warning {
-    background-color: #ffc107; 
+    background-color: #ffc107;
 }
 
 .btn-danger {
-    background-color: #dc3545; 
+    background-color: #dc3545;
 }
 
 .pagination {
     display: flex;
     justify-content: center;
-    margin-top: 20px; 
+    margin-top: 20px;
 }
 
 @media (max-width: 768px) {
@@ -82,9 +104,19 @@ h1 {
         align-items: flex-start;
     }
 
+    .search-bar input,
+    .search-bar select,
+    .search-bar button {
+        max-width: 100%; 
+    }
+
     .table {
         width: 100%;
+        font-size: 12px; 
+    }
+
+    .table th,
+    .table td {
+        padding: 8px; 
     }
 }
-
-

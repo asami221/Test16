@@ -17,39 +17,56 @@ $(document).ready(function() {
         $('#loading-indicator').hide();
     }
 
-    // 検索結果を更新する関数
     function updateSearchResults() {
-        var formData = $('#search-form').serialize();  
-
+        var formData = $('#search-form').serialize();
+        var $searchButton = $('#search-button');
+    
+        $searchButton.prop('disabled', true);
+    
         $.ajax({
-            url: $('#search-form').attr('action'),  
-            method: $('#search-form').attr('method'),
-            type: 'GET', 
-            data: formData,  
+            url: $('#search-form').attr('action'),
+            method: 'GET',
+            data: formData,
             beforeSend: function() {
-                showLoading();  
+                showLoading();
             },
             success: function(response) {
-                
-                $('#searchResults').html(response.html);  
-                $("#productTable").trigger("update");  
-                hideLoading();  
+                var newContent = $(response).find('#productTable');
+    
+                if (newContent.length > 0) {
+                    $('#searchResults').empty();
+                    $('#searchResults').append(newContent.find('tbody').html());
+                    $("#productTable").trigger("update");
+    
+                    applyTableEnhancements();
+                } else {
+                    $('#searchResults').html('<p>結果が見つかりませんでした。</p>');
+                }
+    
+                hideLoading();
             },
             error: function(xhr, status, error) {
                 console.error('検索エラー:', xhr.responseText);
                 alert("検索中にエラーが発生しました。");
                 hideLoading();
+            },
+            complete: function() {
+                $searchButton.prop('disabled', false);
             }
         });
     }
-
     
+    function applyTableEnhancements() {
+        // テーブルソートやデータテーブルの再初期化
+        $("#productTable").tablesorter();
+    
+    }
+
     $('#search-form').on('submit', function(event) {
         event.preventDefault();  
         updateSearchResults();  
     });
 
-    // Enterキーで検索を実行
     $('#query, #manufacturer, #minPrice, #maxPrice, #minStock, #maxStock').on('keypress', function(e) {
         if (e.which === 13) {  
             e.preventDefault();  
