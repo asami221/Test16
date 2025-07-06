@@ -15,18 +15,17 @@
 
     <!-- CSS（Viteなし構成） -->
     <link rel="stylesheet" href="{{ secure_asset('css/create.css') }}">
-<script src="{{ secure_asset('js/search.js') }}"></script>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
         crossorigin="anonymous"></script>
 
     <!-- Tablesorter -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.32.0/js/jquery.tablesorter.min.js"
-        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-
+    <!-- 自作JS -->
+    <script src="{{ secure_asset('js/search.js') }}"></script>
 
     @stack('styles')
 </head>
@@ -38,9 +37,9 @@
                     {{ config('app.name', 'Laravel') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                    data-bs-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent" aria-expanded="false"
-                    aria-label="{{ __('Toggle navigation') }}">
+                        data-bs-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent" aria-expanded="false"
+                        aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -64,7 +63,7 @@
                         @else
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
-                                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                     {{ Auth::user()->name }}
                                 </a>
 
@@ -75,7 +74,7 @@
                                     </a>
 
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST"
-                                        class="d-none">
+                                          class="d-none">
                                         @csrf
                                     </form>
                                 </div>
