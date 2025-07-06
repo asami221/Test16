@@ -1,9 +1,13 @@
 @extends('layouts.app')
 
+@section('title', '商品登録')
+
+@push('styles')
+<link href="{{ asset('css/create.css') }}" rel="stylesheet">
+@endpush
+
 @section('content')
 <div class="container">
-    <link href="{{ asset('css/create.css') }}" rel="stylesheet">
-
     <h2>商品新規登録画面</h2>
 
     <form action="{{ route('products.store') }}" method="POST" enctype="multipart/form-data">
@@ -61,7 +65,6 @@
            <span class="text-danger">{{ $message }}</span>
            @enderror
         </div>
-
 
         <button type="submit" class="btn btn-primary">新規登録</button>
         <a class="btn btn-secondary" href="{{ url('/products') }}">戻る</a>

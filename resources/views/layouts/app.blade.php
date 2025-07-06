@@ -13,12 +13,9 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
-    <!-- Vite compiled CSS and JS -->
-    @vite([
-        'resources/sass/app.scss',
-        'resources/js/app.js',
-        'resources/js/search.js'
-    ])
+    <!-- CSS（Viteなし構成） -->
+    <link rel="stylesheet" href="{{ secure_asset('css/create.css') }}">
+<script src="{{ secure_asset('js/search.js') }}"></script>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
@@ -29,6 +26,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.32.0/js/jquery.tablesorter.min.js"
         integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+
+
     @stack('styles')
 </head>
 <body>
@@ -38,8 +37,10 @@
                 <a class="navbar-brand" href="{{ url('/') }}">
                     {{ config('app.name', 'Laravel') }}
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
-                    aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
