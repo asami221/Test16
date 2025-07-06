@@ -14,7 +14,11 @@
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
     <!-- Vite CSS & JS -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    @vite([
+        'resources/sass/app.scss',
+        'resources/js/app.js',
+        'resources/js/search.js',  {{-- ← ここでVite管理に追加 --}}
+    ])
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
@@ -84,8 +88,5 @@
             @yield('content')
         </main>
     </div>
-
-    <!-- Custom Script -->
-    <script src="{{ asset('JavaScript/search.js') }}"></script>
 </body>
 </html>
