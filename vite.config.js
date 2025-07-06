@@ -5,13 +5,13 @@ export default defineConfig({
   plugins: [
     laravel({
       input: [
-        'resources/sass/app.scss', // ← こちらに戻しました！
+        'resources/sass/app.scss',
         'resources/js/app.js',
       ],
       refresh: true,
     }),
   ],
   build: {
-    outDir: 'public/build', // このままでOK！
+    outDir: 'public/build', 
   },
 });
