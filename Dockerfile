@@ -25,8 +25,12 @@ WORKDIR /var/www/html
 # アプリケーションのコードをコピー
 COPY . .
 
-# Laravel セットアップ
-RUN composer install && npm install && npm run build && php artisan config:clear
+# Laravel セットアップとキャッシュクリア
+RUN composer install && npm install && npm run build && \
+    php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan route:clear && \
+    php artisan view:clear
 
 # SQLiteファイルをプロジェクト内に生成（ないとエラーになることがある）
 RUN mkdir -p database && touch database/database.sqlite
