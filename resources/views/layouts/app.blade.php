@@ -13,22 +13,16 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
-    <!-- Scripts -->
-    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
-    
-    <!-- jQuery (必要な順序を守る) -->
+    <!-- Build CSS -->
+    <link rel="stylesheet" href="{{ asset('build/assets/app-1bd03d06.css') }}">
+
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
-    
-    <!-- Tablesorter JS (jQueryの後にロード) -->
+
+    <!-- Tablesorter -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.32.0/js/jquery.tablesorter.min.js"></script>
 
-    <head>
     @stack('styles')
-    </head>
-
-    <!-- Custom Scripts (最後にロード) -->
-    <script src="{{ asset('JavaScript/search.js') }}"></script>
-</head>
 </head>
 <body>
     <div id="app">
@@ -43,20 +37,16 @@
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav me-auto">
-                        <!-- 空のリスト、必要なら追加してください -->
-                    </ul>
+                    <ul class="navbar-nav me-auto"></ul>
 
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
-                        <!-- Authentication Links -->
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                                 </li>
                             @endif
-
                             @if (Route::has('register'))
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
@@ -70,8 +60,7 @@
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
+                                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                                         {{ __('Logout') }}
                                     </a>
 
@@ -90,5 +79,9 @@
             @yield('content')
         </main>
     </div>
+
+    <!-- Custom JS -->
+    <script src="{{ asset('build/assets/app-73f9d153.js') }}" defer></script>
+    <script src="{{ asset('JavaScript/search.js') }}"></script>
 </body>
 </html>
