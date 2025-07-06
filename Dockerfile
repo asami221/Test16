@@ -38,5 +38,5 @@ RUN mkdir -p database && touch database/database.sqlite
 # ポート開放
 EXPOSE 10000
 
-# Laravel アプリケーション起動コマンド
-CMD ["php", "artisan", "serve", "--host", "0.0.0.0", "--port", "10000"]
+# Laravel アプリケーション起動＋マイグレーション
+CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000"]
