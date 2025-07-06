@@ -11,6 +11,7 @@ $(document).ready(function() {
     function showLoading() {
         $('#loading-indicator').show();
     }
+    
 
     // ローディングインジケーターの非表示
     function hideLoading() {
