@@ -13,11 +13,11 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
-    <!-- Vite CSS & JS -->
+    <!-- Vite compiled CSS and JS -->
     @vite([
         'resources/sass/app.scss',
         'resources/js/app.js',
-        'resources/js/search.js',  {{-- ← ここでVite管理に追加 --}}
+        'resources/js/search.js'
     ])
 
     <!-- jQuery -->
@@ -26,7 +26,8 @@
         crossorigin="anonymous"></script>
 
     <!-- Tablesorter -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.32.0/js/jquery.tablesorter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.32.0/js/jquery.tablesorter.min.js"
+        integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     @stack('styles')
 </head>
