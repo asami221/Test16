@@ -1,8 +1,7 @@
 FROM php:8.2-fpm
 
-# 必要なパッケージをインストール
+# 必要パッケージのインストール（Node系は使わないなら削除）
 RUN apt-get update && apt-get install -y \
-    build-essential \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
@@ -12,31 +11,29 @@ RUN apt-get update && apt-get install -y \
     curl \
     git \
     sqlite3 \
-    libsqlite3-dev \
-    npm \
-    nodejs
+    libsqlite3-dev
 
-# Composer インストール
+# Composerのインストール
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# 作業ディレクトリ
+# 作業ディレクトリを設定
 WORKDIR /var/www/html
 
-# アプリケーションのコードをコピー
+# アプリケーションファイルをコンテナにコピー
 COPY . .
 
-# Laravel セットアップとキャッシュクリア
-RUN composer install && npm install && npm run build && \
+# Laravel依存のインストールとキャッシュクリア（npm不要）
+RUN composer install && \
     php artisan config:clear && \
     php artisan cache:clear && \
     php artisan route:clear && \
     php artisan view:clear
 
-# SQLiteファイルをプロジェクト内に生成（ないとエラーになることがある）
+# SQLiteファイルを生成（存在しないとRenderでエラーになる）
 RUN mkdir -p database && touch database/database.sqlite
 
-# ポート開放
+# ポート指定（Renderで使われるポート）
 EXPOSE 10000
 
-# Laravel アプリケーション起動＋マイグレーション
+# 起動時コマンド（マイグレーションもついでに）
 CMD ["sh", "-c", "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=10000"]
