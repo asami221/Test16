@@ -13,16 +13,15 @@
     <link rel="dns-prefetch" href="//fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=Nunito" rel="stylesheet">
 
-    <!-- CSS（Viteなし構成） -->
+    <!-- CSS -->
     <link rel="stylesheet" href="{{ secure_asset('css/create.css') }}">
 
     <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" crossorigin="anonymous"></script>
 
     <!-- Tablesorter -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.32.0/js/jquery.tablesorter.min.js"
-        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <!-- 自作JS -->
     <script src="{{ secure_asset('js/search.js') }}"></script>
@@ -33,7 +32,8 @@
     <div id="app">
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
+                <!-- 🔽 secure_url に変更 -->
+                <a class="navbar-brand" href="{{ secure_url('/') }}">
                     {{ config('app.name', 'Laravel') }}
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -44,10 +44,8 @@
                 </button>
 
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side -->
                     <ul class="navbar-nav me-auto"></ul>
 
-                    <!-- Right Side -->
                     <ul class="navbar-nav ms-auto">
                         @guest
                             @if (Route::has('login'))
